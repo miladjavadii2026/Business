@@ -208,6 +208,13 @@
     }
     .hero::after { content: ""; position: absolute; z-index: -2; width: 720px; height: 720px; right: -220px; top: -260px; background: radial-gradient(circle, rgba(43, 163, 138, 0.20), transparent 62%); pointer-events: none; }
     .hero-curve { position: absolute; z-index: -1; right: -2%; bottom: -6%; width: min(44%, 620px); opacity: 0.5; pointer-events: none; }
+    .hero-glow {
+      position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .5s ease;
+      background: radial-gradient(420px circle at var(--gx, 70%) var(--gy, 30%), rgba(43, 163, 138, 0.30), rgba(43, 163, 138, 0.07) 42%, transparent 70%);
+      mix-blend-mode: screen;
+    }
+    .hero-glow.is-active { opacity: 1; }
+    @media (prefers-reduced-motion: reduce) { .hero-glow { display: none; } }
 
     .hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr); gap: clamp(40px, 6vw, 88px); align-items: center; }
     .eyebrow-dark { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 28px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
@@ -932,6 +939,7 @@
       }).join("");
       return '' +
       '<section class="hero" id="home" aria-labelledby="hero-title">' +
+        '<div class="hero-glow" data-hero-glow aria-hidden="true"></div>' +
         '<svg class="hero-curve" viewBox="0 0 600 420" aria-hidden="true" focusable="false">' +
           '<g fill="none" stroke="#2BA38A" stroke-linecap="round">' +
             '<path d="M60 20V380H580" stroke-opacity=".35" stroke-width="1.2"/>' +
@@ -1363,6 +1371,33 @@
       if (y) y.textContent = new Date().getFullYear();
 
       var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+
+      // Hero glow: a restrained cursor-follow highlight, desktop pointer only
+      var heroEl = document.querySelector(".hero");
+      var glowEl = document.querySelector("[data-hero-glow]");
+      if (heroEl && glowEl && finePointer && !reduceMotion) {
+        var gx = 70, gy = 30, tx = 70, ty = 30, raf = null;
+        function step() {
+          gx += (tx - gx) * 0.14;
+          gy += (ty - gy) * 0.14;
+          glowEl.style.setProperty("--gx", gx + "%");
+          glowEl.style.setProperty("--gy", gy + "%");
+          if (Math.abs(tx - gx) > 0.1 || Math.abs(ty - gy) > 0.1) {
+            raf = requestAnimationFrame(step);
+          } else {
+            raf = null;
+          }
+        }
+        heroEl.addEventListener("pointermove", function (e) {
+          var r = heroEl.getBoundingClientRect();
+          tx = ((e.clientX - r.left) / r.width) * 100;
+          ty = ((e.clientY - r.top) / r.height) * 100;
+          glowEl.classList.add("is-active");
+          if (!raf) raf = requestAnimationFrame(step);
+        });
+        heroEl.addEventListener("pointerleave", function () { glowEl.classList.remove("is-active"); });
+      }
 
       // Rotating role descriptor in hero
       var roleWord = document.querySelector("[data-role-rotator]");
