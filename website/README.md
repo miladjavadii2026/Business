@@ -10,6 +10,8 @@ Personal landing site for Milad Javadi. It is a static site with no build step.
 | `404.html` | "Page not found" page. |
 | `favicon.svg`, `apple-touch-icon.png` | Browser and home-screen icons. |
 | `og-image.png` | Preview image for LinkedIn, Slack, and other link shares (1200 x 630). |
+| `portrait.jpg` | Hero photo (900 x 1125, 4:5). |
+| `Milad_Javadi_Resume_Procurement_Category.pdf` | Downloadable résumé, linked from the nav and contact section. |
 | `robots.txt`, `sitemap.xml` | Search engine files. |
 | `CNAME` | Custom domain for GitHub Pages (`www.miladjavadi.com`). Other hosts ignore it. |
 
